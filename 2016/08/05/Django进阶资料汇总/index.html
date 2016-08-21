@@ -1,0 +1,599 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Django," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Django核心
+How to create Django Signals?
+Django中间件 v1.10变化很大
+
+Django最佳实践
+BEST PRACTICES IN DJANGO DEVELOPMENT  
+Django Channels 处理WebSockets,HTTP2,和简单Background Tasks，如果需要分布式的任务队列，还是要用celery，Channels局限性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Django进阶资料汇总">
+<meta property="og:url" content="http://yoursite.com/2016/08/05/Django进阶资料汇总/index.html">
+<meta property="og:site_name" content="梵高先生">
+<meta property="og:description" content="Django核心
+How to create Django Signals?
+Django中间件 v1.10变化很大
+
+Django最佳实践
+BEST PRACTICES IN DJANGO DEVELOPMENT  
+Django Channels 处理WebSockets,HTTP2,和简单Background Tasks，如果需要分布式的任务队列，还是要用celery，Channels局限性">
+<meta property="og:updated_time" content="2016-08-06T07:47:32.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Django进阶资料汇总">
+<meta name="twitter:description" content="Django核心
+How to create Django Signals?
+Django中间件 v1.10变化很大
+
+Django最佳实践
+BEST PRACTICES IN DJANGO DEVELOPMENT  
+Django Channels 处理WebSockets,HTTP2,和简单Background Tasks，如果需要分布式的任务队列，还是要用celery，Channels局限性">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> Django进阶资料汇总 | 梵高先生 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">梵高先生</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Django进阶资料汇总
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-05T15:45:43+08:00" content="2016-08-05">
+              2016-08-05
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="Django核心"><a href="#Django核心" class="headerlink" title="Django核心"></a>Django核心</h3><ul>
+<li><a href="https://simpleisbetterthancomplex.com/tutorial/2016/07/28/how-to-create-django-signals.html" target="_blank" rel="external">How to create Django Signals?</a></li>
+<li><a href="https://docs.djangoproject.com/en/1.10/topics/http/middleware/" target="_blank" rel="external">Django中间件</a> v1.10变化很大</li>
+</ul>
+<h3 id="Django最佳实践"><a href="#Django最佳实践" class="headerlink" title="Django最佳实践"></a>Django最佳实践</h3><ul>
+<li><a href="http://www.allaboutweb.biz/best-practices-in-django-development/" target="_blank" rel="external">BEST PRACTICES IN DJANGO DEVELOPMENT</a>  </li>
+<li><a href="https://channels.readthedocs.io/en/latest/" target="_blank" rel="external">Django Channels</a> 处理WebSockets,HTTP2,和简单Background Tasks，如果需要分布式的任务队列，还是要用celery，Channels局限性太多</li>
+<li><a href="http://www.machinalis.com/blog/introduction-to-django-channels/" target="_blank" rel="external">channels</a></li>
+</ul>
+<h3 id="任务队列"><a href="#任务队列" class="headerlink" title="任务队列"></a>任务队列</h3><ul>
+<li><a href="http://www.fullstackpython.com/task-queues.html" target="_blank" rel="external">Tasks Queues</a></li>
+<li><a href="https://library.launchkit.io/three-quick-tips-from-two-years-with-celery-c05ff9d7f9eb#.m5rwqgmaq" target="_blank" rel="external">Celery Tips</a></li>
+<li><a href="http://agiliq.com/blog/2015/07/getting-started-with-celery-and-redis/" target="_blank" rel="external">Celery and Redis</a><h3 id="DevOps"><a href="#DevOps" class="headerlink" title="DevOps"></a>DevOps</h3></li>
+<li><a href="https://insights.sei.cmu.edu/devops/2015/03/devops-technologies-fabric-or-ansible.html" target="_blank" rel="external">DevOps Technologies: Fabric or Ansible</a></li>
+<li><a href="http://docs.ansible.com/ansible/" target="_blank" rel="external">Ansible Docs</a></li>
+</ul>
+<h3 id="Django性能提升"><a href="#Django性能提升" class="headerlink" title="Django性能提升"></a>Django性能提升</h3><ul>
+<li><a href="http://www.revsys.com/blog/2015/may/06/django-performance-simple-things/" target="_blank" rel="external">Django Performance: 4 Simple Things</a><h3 id="Django-Server"><a href="#Django-Server" class="headerlink" title="Django Server"></a>Django Server</h3></li>
+<li><a href="https://www.digitalocean.com/community/tutorials/django-server-comparison-the-development-server-mod_wsgi-uwsgi-and-gunicorn" target="_blank" rel="external">Django Server Comparison</a></li>
+</ul>
+<h3 id="有趣的开源项目"><a href="#有趣的开源项目" class="headerlink" title="有趣的开源项目"></a>有趣的开源项目</h3><ul>
+<li><a href="https://github.com/emre/django-stackoverflow-trace" target="_blank" rel="external">django-stackoverflow-trace</a> DEBUG模式开启时帮你在stackoverflow上自动搜索error</li>
+<li><a href="https://github.com/bndr/pipreqs" target="_blank" rel="external">pipreqs 代替pip freeze</a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Django/" rel="tag">#Django</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/04/Pycharm使用技巧/" rel="next" title="Pycharm使用技巧">
+                <i class="fa fa-chevron-left"></i> Pycharm使用技巧
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/08/05/Celery学习笔记/" rel="prev" title="Celery学习笔记">
+                Celery学习笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="Zhiyuan Liang" />
+          <p class="site-author-name" itemprop="name">Zhiyuan Liang</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Django核心"><span class="nav-number">1.</span> <span class="nav-text">Django核心</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Django最佳实践"><span class="nav-number">2.</span> <span class="nav-text">Django最佳实践</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#任务队列"><span class="nav-number">3.</span> <span class="nav-text">任务队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DevOps"><span class="nav-number">4.</span> <span class="nav-text">DevOps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Django性能提升"><span class="nav-number">5.</span> <span class="nav-text">Django性能提升</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Django-Server"><span class="nav-number">6.</span> <span class="nav-text">Django Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#有趣的开源项目"><span class="nav-number">7.</span> <span class="nav-text">有趣的开源项目</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhiyuan Liang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
