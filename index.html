@@ -351,12 +351,12 @@ StopIteration:
 In [46]: fib
 Out[46]: &lt;function __main__.fib&gt;  
 
-fib只是一个普通的函数
+fib只是一个普通的生成器函数
 
 In [42]: fib(5)
 Out[42]: &lt;generator object fib at 0x10ffa1f68&gt;
 
-但是fib(5)返回的是一个生成器对象
+fib(5)返回的才是一个生成器对象
 
 for i in fib(6):
     print(i)
@@ -380,6 +380,19 @@ TypeError: str object is not an iterator
 In [40]: next(s_iterator)
 
 Out[40]: &apos;a&apos;
+</code></pre><h2 id="生成器表达式"><a href="#生成器表达式" class="headerlink" title="生成器表达式"></a>生成器表达式</h2><pre><code>In [1]: numbers = [i for i in range(6)]
+
+In [2]: numbers
+Out[2]: [0, 1, 2, 3, 4, 5]
+
+我们通过列表推导式生成列表numbers
+
+In [3]: generator_num = (i for i in range(6))
+
+In [4]: generator_num
+Out[4]: &lt;generator object &lt;genexpr&gt; at 0x110be3eb8&gt;  
+
+通过生成器表达式来实现“惰性计算”，从而节省内存消耗
 </code></pre><h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
 <li>《Python语言及其应用》</li>
 <li><a href="https://www.gitbook.com/book/eastlakeside/interpy-zh/details" target="_blank" rel="external">《Python进阶》</a></li>
