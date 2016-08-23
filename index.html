@@ -230,6 +230,242 @@
             
               
                 
+                <a class="post-title-link" href="/2016/08/23/Python装饰器/" itemprop="url">
+                  Python装饰器
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-23T09:22:04+08:00" content="2016-08-23">
+              2016-08-23
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="装饰器（Decorators）"><a href="#装饰器（Decorators）" class="headerlink" title="装饰器（Decorators）"></a>装饰器（Decorators）</h2><p>装饰器(Decorators)是Python的一个重要部分。使用它，你可以在不改变原来函数的基础上轻易地扩展函数的功能，使你的代码更加Pythonic</p>
+<h3 id="函数也是对象"><a href="#函数也是对象" class="headerlink" title="函数也是对象"></a>函数也是对象</h3><p>首先我们要明白，python中一切皆为对象，函数也是对象</p>
+<pre><code>In [1]: def hi(name=&apos;Bob&apos;):
+...:        return &quot;hi &quot; + name
+...:
+
+In [2]: print(hi())
+hi Bob
+
+In [3]: greet = hi   # 函数是对象，可以赋值给其它变量
+
+In [4]: print(greet())
+hi Bob
+
+In [5]: del hi
+
+In [6]: print(greet())
+hi Bob
+
+In [7]: print(hi())
+NameError: name &apos;hi&apos; is not defined
+</code></pre><h3 id="函数闭包"><a href="#函数闭包" class="headerlink" title="函数闭包"></a>函数闭包</h3><p>既然函数也是对象，那么我们就可以在函数中定义函数，从函数中返回函数：</p>
+<pre><code>def outer():
+    x = 1
+    y = 2
+    def inner():
+        print(x)
+    return inner
+
+foo = outer()
+</code></pre><p>上面我们把inner作为一个函数被outer返回，并保存在foo变量中，不过foo()能正常运行吗？  </p>
+<p>从python的作用域规则来讲，x, y是函数outer的本地变量，而且只有当outer运行的时候才会存在。所以当我们在outer返回之后如果继续调用inner，此时变量x，y应该早已不复存在，可能会发生一个运行时候的错误。  </p>
+<pre><code>In [22]: foo()
+1
+</code></pre><p>万万没想到，返回的inner函数赋值给foo后仍能正常工作，这是为什么呢？<br>其实Python支持一个叫做“函数闭包”的特性，简言之，嵌套定义在非全局作用域里面的函数能够记住它在被定义的时候它所处的封闭命名空间。</p>
+<pre><code>In [21]: foo.__closure__
+Out[21]: (&lt;cell at 0x1062c31c8: int object at 0x1041f5450&gt;,)
+</code></pre><p>我们通过函数的__closure__属性可以看出，这个属性里面包含封闭作用域里的值，为什么只有一个int object呢？<br>因为封闭命名空间只会包含被捕捉到的值，比如x，虽然outer还定义了y，但是封闭作用域里面是不会有的。  </p>
+<p>下面我们稍微做一下变化：  </p>
+<pre><code>def outer(x):
+    def inner():
+        print(x)
+    return inner
+print1 = outer(1)
+print2 = outer(2)
+print1()
+1
+print2()
+2
+</code></pre><p>从上面的例子可以看出，我们通过闭包，即被函数记住的封闭作用域，轻松地创建了我们的自定义函数</p>
+<h3 id="装饰器也是闭包"><a href="#装饰器也是闭包" class="headerlink" title="装饰器也是闭包"></a>装饰器也是闭包</h3><p>其实装饰器就是一个闭包，只不过它把原函数当作参数，并返回一个装饰过的函数，从而在不修改原函数的基础上给原函数添加功能</p>
+<pre><code>def outer(func):
+    def inner():
+        print(&quot;before func&quot;)
+        func()
+        print(&quot;after func&quot;)
+    return inner
+
+def foo():
+    print(&quot;i am foo&quot;)
+
+decorated_foo = outer(foo)
+
+In [32]: decorated_foo()
+
+before func
+i am foo
+after func
+</code></pre><p>由上面例子可以看出来，我们通过闭包，把foo函数当作参数传递给来装饰器，并返回了一个装饰过的foo函数，加强了foo的功能</p>
+<h3 id="标识符"><a href="#标识符" class="headerlink" title="@标识符"></a>@标识符</h3><p>通常，我们使用@标识符来将装饰器应用到函数：</p>
+<pre><code>@outer
+def foo():
+    print(&quot;i am foo&quot;)
+
+In [33]: foo.__name__
+Out[33]: &apos;inner&apos;
+</code></pre><p>可是问题是，我们函数经过装饰之后__name__被inner改写了，Python提供来functools.wraps来解决这个问题  </p>
+<h3 id="使用-wraps"><a href="#使用-wraps" class="headerlink" title="使用@wraps"></a>使用@wraps</h3><pre><code>from functools import wraps
+
+def outer(func):
+    @wraps(func)
+    def inner():
+        print(&quot;before func&quot;)
+        func()
+        print(&quot;after func&quot;)
+    return inner
+</code></pre><p>把原来的装饰器函数outer修改后，重新装饰foo函数</p>
+<pre><code>In [38]: foo.__name__
+Out[38]: &apos;foo&apos;
+</code></pre><p>我们可以看出，此时被装饰之后的函数__name__并没有被装饰器修改</p>
+<p>注意：@wraps接受一个函数来进行装饰，并加入了复制函数名称、注释文档、参数列表等等的功能。这可以让我们在装饰器里面访问在装饰之前的函数的属性，@wraps也是一个装饰器  </p>
+<h3 id="使用args和kwargs"><a href="#使用args和kwargs" class="headerlink" title="使用args和kwargs"></a>使用args和kwargs</h3><p>如果想进一步提升我们装饰器的功能，获取任意被装饰函数被调用时的参数，该怎么办呢？  </p>
+<pre><code>def outer(func):
+    @wraps(func)
+    def inner(*args, **kwargs):
+        print(&quot;Arguments are:{0}, {1}&quot;.format(args, kwargs))
+        return func(*args, **kwargs)
+    return inner
+
+@outer
+def foo(x, y=1):
+    return x+y
+
+
+In [46]: foo(1, 1)
+Arguments are:(1, 1), {}
+Out[46]: 2
+
+In [47]: foo(1)
+Arguments are:(1,), {}
+Out[47]: 2
+</code></pre><p>相当简单～</p>
+<h2 id="装饰器的典型应用场景"><a href="#装饰器的典型应用场景" class="headerlink" title="装饰器的典型应用场景"></a>装饰器的典型应用场景</h2><h3 id="授权（Authorization）"><a href="#授权（Authorization）" class="headerlink" title="授权（Authorization）"></a>授权（Authorization）</h3><p>装饰器能有助于检查某个人是否被授权去使用一个web应用的端点(endpoint)。它们被大量使用于Flask和Django web框架中。  </p>
+<pre><code>from functools import wraps
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            authenticate()  # 处理未授权的逻辑，比如返回HTTP 401
+        return f(*args, **kwargs)
+    return decorated
+</code></pre><p>其实在比较常见的web框架比如，Flask中的路由注册，Django中的缓存机制，这些都是基于装饰器实现的</p>
+<h3 id="日志-Log"><a href="#日志-Log" class="headerlink" title="日志 (Log)"></a>日志 (Log)</h3><p>装饰器日志其实很常见啦，下面是一个简单的列子:  </p>
+<pre><code>from functools import wraps
+
+def log(func):
+    @wraps(func)
+    def with_logging(*args, **kwargs):
+        print(func.__name__ + &quot; was called&quot;)
+        return func(*args, **kwargs)
+    return with_logging
+
+@log
+def addition_func(x):
+    return x + x
+</code></pre><h3 id="更多的例子"><a href="#更多的例子" class="headerlink" title="更多的例子"></a>更多的例子</h3><p><a href="https://wiki.python.org/moin/PythonDecoratorLibrary" target="_blank" rel="external">Python Decorator Library</a>这里有丰富的例子，基本上包含了所有你能用到装饰器的场景  </p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://coolshell.cn/articles/11265.html" target="_blank" rel="external">Python修饰器的函数式编程</a>  </li>
+<li><a href="http://python.jobbole.com/81683/" target="_blank" rel="external">12步轻松搞定python装饰器</a>  </li>
+<li><a href="https://www.gitbook.com/book/eastlakeside/interpy-zh/details" target="_blank" rel="external">《Python进阶》</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/08/21/Python生成器/" itemprop="url">
                   Python生成器
                 </a>
@@ -1157,7 +1393,7 @@ Out[4]: &lt;generator object &lt;genexpr&gt; at 0x110be3eb8&gt;
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">8</span>
+              <span class="site-state-item-count">9</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
