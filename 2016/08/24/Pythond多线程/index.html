@@ -1,0 +1,688 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Python," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="背景知识并发与并行
+Concurrency is about dealing with lots of things at once.
+如果一个系统支持有多个动作（Action）同时存在，那么就是一个并发系统。并发程序同时可以拥有多个线程，是计算机充分利用单核（一个CPU）实现（或者看起来）多个任务同时执行，其实并不是真的同时执行，因为在某个CPU时间段只有一个线程在运行，其它线程都属于挂起状态。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python多线程">
+<meta property="og:url" content="http://yoursite.com/2016/08/24/Pythond多线程/index.html">
+<meta property="og:site_name" content="梵高先生">
+<meta property="og:description" content="背景知识并发与并行
+Concurrency is about dealing with lots of things at once.
+如果一个系统支持有多个动作（Action）同时存在，那么就是一个并发系统。并发程序同时可以拥有多个线程，是计算机充分利用单核（一个CPU）实现（或者看起来）多个任务同时执行，其实并不是真的同时执行，因为在某个CPU时间段只有一个线程在运行，其它线程都属于挂起状态。">
+<meta property="og:updated_time" content="2016-08-25T06:44:14.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python多线程">
+<meta name="twitter:description" content="背景知识并发与并行
+Concurrency is about dealing with lots of things at once.
+如果一个系统支持有多个动作（Action）同时存在，那么就是一个并发系统。并发程序同时可以拥有多个线程，是计算机充分利用单核（一个CPU）实现（或者看起来）多个任务同时执行，其实并不是真的同时执行，因为在某个CPU时间段只有一个线程在运行，其它线程都属于挂起状态。">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> Python多线程 | 梵高先生 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">梵高先生</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Python多线程
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-24T14:34:47+08:00" content="2016-08-24">
+              2016-08-24
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h2><h3 id="并发与并行"><a href="#并发与并行" class="headerlink" title="并发与并行"></a>并发与并行</h3><ul>
+<li><p>Concurrency is about dealing with lots of things at once.</p>
+<p>如果一个系统支持有多个动作（Action）同时存在，那么就是一个并发系统。<br>并发程序同时可以拥有多个线程，是计算机充分利用单核（一个CPU）实现（或者看起来）多个任务同时执行，其实并不是真的同时执行，因为在某个CPU时间段只有一个线程在运行，其它线程都属于挂起状态。</p>
+</li>
+<li><p>Parallelism is about doing lots of things at once.</p>
+<p>如果一个系统支持多个动作同时执行，那么就是一个并行系统。<br>因此，只有多核才能实现真正的并行。</p>
+</li>
+</ul>
+<p>简言之，当我们聊起并发和并行，是指不同代码块交替执行的能力和不同代码块同时执行的能力。</p>
+<h3 id="线程与进程"><a href="#线程与进程" class="headerlink" title="线程与进程"></a>线程与进程</h3><p>在多任务系统中，每个应用程序都有一个自己的进程，操作系统会为进程分配一些执行资源，比如内存空间等，在进程中又可以创建一些线程，线程共享这些执行资源，并由操作系统调用。</p>
+<h3 id="线程状态"><a href="#线程状态" class="headerlink" title="线程状态"></a>线程状态</h3><p>线程有多个状态：  </p>
+<ul>
+<li>New 创建</li>
+<li>Runnable 就绪，等待调度</li>
+<li>Running 运行</li>
+<li>Blocked 阻塞</li>
+<li>Dead 消亡</li>
+</ul>
+<h2 id="Python多线程"><a href="#Python多线程" class="headerlink" title="Python多线程"></a>Python多线程</h2><h3 id="语言支持"><a href="#语言支持" class="headerlink" title="语言支持"></a>语言支持</h3><ul>
+<li>thread(2.x)或_thread(3.x)是python多线程的底层支持模块，不建议使用。</li>
+<li>threading是对thread进一步封装的标准库，推荐使用。</li>
+</ul>
+<h3 id="线程创建"><a href="#线程创建" class="headerlink" title="线程创建"></a>线程创建</h3><p>我们通过覆盖threading.Thread类中的run方法来创建自己多线程类  </p>
+<pre><code>import time
+import requests
+from threading import Thread
+
+class GetUrlThread(Thread):
+    def __init__(self, url):
+        self.url = url
+        super().__init__()
+
+    def run(self):
+        resp = requests.get(self.url)
+        print(&apos;{} request {} status_code is {}&apos;.format(self.name, self.url, resp.status_code))
+
+urls = [
+      &apos;http://www.baidu.com&apos;,
+      &apos;http://cn.bing.com&apos;,
+      &apos;http://www.sina.com.cn&apos;,
+      &apos;https://www.amazon.cn&apos;,
+      &apos;http://www.jd.com/&apos;
+    ]
+threads = [GetUrlThread(url) for url in urls]
+
+start = time.time()
+
+for t in threads:
+    t.start()
+
+for t in threads:
+    t.join()
+
+print(&apos;Elapsed time: {}&apos;.format(time.time()-start))
+</code></pre><p>输出：</p>
+<pre><code>Thread-1 request http://www.baidu.com status_code is 200
+Thread-2 request http://cn.bing.com status_code is 200
+Thread-5 request http://www.jd.com/ status_code is 200
+Thread-3 request http://www.sina.com.cn status_code is 200
+Thread-4 request https://www.amazon.cn status_code is 200
+Elapsed time: 2.341024160385132  
+</code></pre><p>解释：</p>
+<ul>
+<li>我们通过多线程来减少CPU的等待时间，当一个线程内等待网络请求返回时，CPU可以切换到其它线程进行网络请求</li>
+<li>线程是无序运行的</li>
+<li>每个线程必须执行run方法</li>
+<li>我们通过start()来告诉CPU执行线程中的run方法  </li>
+</ul>
+<h3 id="线程合并"><a href="#线程合并" class="headerlink" title="线程合并"></a>线程合并</h3><p>join()方法用于线程合并，主线程或某个函数创建了子线程，只要调用了子线程的join方法，那么主线程就会被子线程阻塞。上面的例子中，主线程将被每一个子线程阻塞，子线程之间无序运行。试想一下如果我们在每一个子线程start之后，就调用join方法  </p>
+<pre><code>for t in threads:
+    t.start()
+    t.join()
+</code></pre><p>此时我们可以看到，每个子线程都被后来新建的子线程给阻塞了，因此线程将变得有序运行。</p>
+<h3 id="互斥锁与线程同步"><a href="#互斥锁与线程同步" class="headerlink" title="互斥锁与线程同步"></a>互斥锁与线程同步</h3><p>多线程最常见的一个问题：数据共享。当多个线程都修改某个共享的数据时，使得线程运行结果不可预期，这种现象就是“线程不安全”<br>而线程同步能够保证多个线程安全访问竞争资源，最简单的同步机制是引入互斥锁。互斥锁给资源引入了状态：锁定或非锁定，当某个线程修改共享数据时，先将其锁定，其它线程不能更改，直到该线程释放资源，才将资源的状态变为“非锁定”。因此互斥锁保证了每次只有一个线程进行写操作，从而保证了多线程情况下数据的一致性。</p>
+<pre><code>import threading
+
+class SharedCounter():
+    def __init__(self, initial_value=0):
+        self._value = initial_value
+        self._value_lock = threading.Lock()
+
+    def incr(self,delta=1):
+        with self._value_lock:
+            self._value += delta
+
+    def decr(self, delta=1):
+        with self._value_lock:
+            self._value -= delta
+
+counter = SharedCounter()
+for t in [threading.Thread(target=counter.incr()) for i in range(50)]:
+    t.start()
+    t.join()
+print(counter._value)
+
+输出：50
+</code></pre><p>上面例子中，我们通过Lock对象和with语句块保证互斥执行，每次只有一个线程可以执行with语句包含的代码块。with语句会在代码块执行前自动获得锁，并在执行结束后自动释放锁。当然你也可以使用acquire和release显式获得锁释放锁，不过with更加优雅安全。<br>当一个线程获得锁时，锁就进入“locked”状态，如果此时有另一个线程试图获得这个锁，该线程就会变成”blocked”状态，即“同步阻塞”。直到该线程释放锁，锁进入”unlocked”状态。线程调度从阻塞状态的线程中选择一个获得锁，并使得该线程进入运行（running）状态</p>
+<h3 id="死锁问题"><a href="#死锁问题" class="headerlink" title="死锁问题"></a>死锁问题</h3><p>死锁是每一个多线程程序都会面临的一个问题。根据经验，应该尽可能保证每一个线程都只能同时保持一个锁，一旦有线程同时申请多个锁，一切就不可预料了。死锁的检测和恢复，以及如何避免死锁是我们使用多线程的一个难题。建议参考<a href="http://python3-cookbook.readthedocs.io/zh_CN/latest/chapters/p12_concurrency.html" target="_blank" rel="external">Python3 cookbook</a>来深入研究。</p>
+<h3 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h3><p>使用ThreadPoolExecutor轻松创建线程池</p>
+<pre><code>from concurrent.futures import ThreadPoolExecutor
+import requests
+
+def fetch_url(url):
+    resp = requests.get(url)
+    print(&apos;request {} status_code is {}&apos;.format(url, resp.status_code))
+
+pool = ThreadPoolExecutor(10)
+
+for url in urls:
+    pool.submit(fetch_url,url)
+</code></pre><p>##Python GIL<br>由于Python GIL的存在，Python的多线程只对IO密集型场景产生正面效果，而当有至少有一个CPU密集型线程存在时，多线程效率会因为GIL的存在而大幅下降，详细分析可以参考<a href="http://python.jobbole.com/81822/" target="_blank" rel="external">Python的GIL是什么鬼，多线程性能究竟如何</a></p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a href="http://www.tuicool.com/articles/fER3Mfu" target="_blank" rel="external">我是一个线程</a></li>
+<li><a href="https://segmentfault.com/a/1190000001813992" target="_blank" rel="external">Python 中的进程、线程、协程、同步、异步、回调</a></li>
+<li><a href="http://www.cnblogs.com/aylin/p/5601969.html" target="_blank" rel="external">python进程、线程、协程</a></li>
+<li><a href="http://www.cnblogs.com/aylin/p/5601969.html" target="_blank" rel="external">python 线程与进程简介</a></li>
+<li><a href="http://blog.rainy.im/2016/04/07/python-thread-and-coroutine/" target="_blank" rel="external">Python线程与协程</a></li>
+<li><a href="http://blog.rainy.im/2016/03/10/how-the-heck-does-async-await-work-in-python-3-5/" target="_blank" rel="external">[译] Python 3.5 协程究竟是个啥</a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag">#Python</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/23/Python装饰器/" rel="next" title="Python装饰器">
+                <i class="fa fa-chevron-left"></i> Python装饰器
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="Zhiyuan Liang" />
+          <p class="site-author-name" itemprop="name">Zhiyuan Liang</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景知识"><span class="nav-number">1.</span> <span class="nav-text">背景知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#并发与并行"><span class="nav-number">1.1.</span> <span class="nav-text">并发与并行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程与进程"><span class="nav-number">1.2.</span> <span class="nav-text">线程与进程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程状态"><span class="nav-number">1.3.</span> <span class="nav-text">线程状态</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python多线程"><span class="nav-number">2.</span> <span class="nav-text">Python多线程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#语言支持"><span class="nav-number">2.1.</span> <span class="nav-text">语言支持</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程创建"><span class="nav-number">2.2.</span> <span class="nav-text">线程创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程合并"><span class="nav-number">2.3.</span> <span class="nav-text">线程合并</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#互斥锁与线程同步"><span class="nav-number">2.4.</span> <span class="nav-text">互斥锁与线程同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁问题"><span class="nav-number">2.5.</span> <span class="nav-text">死锁问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程池"><span class="nav-number">2.6.</span> <span class="nav-text">线程池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考资料"><span class="nav-number">2.7.</span> <span class="nav-text">参考资料</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhiyuan Liang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
