@@ -1,0 +1,661 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Python," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="背景知识在现在流行的编程语言中，异步、协程、事件循环越来越受关注，本文试图探讨一下Python中协程原理，以及在python3.5中实现了IO多路复用、原生协程(coroutine)、与事件循环(event loop)的标准库asyncio
+协程是什么？根据维基百科：
+
+Coroutines are computer program components that generalize subro">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python协程与异步编程">
+<meta property="og:url" content="http://yoursite.com/2016/08/26/Python协程与异步编程/index.html">
+<meta property="og:site_name" content="梵高先生">
+<meta property="og:description" content="背景知识在现在流行的编程语言中，异步、协程、事件循环越来越受关注，本文试图探讨一下Python中协程原理，以及在python3.5中实现了IO多路复用、原生协程(coroutine)、与事件循环(event loop)的标准库asyncio
+协程是什么？根据维基百科：
+
+Coroutines are computer program components that generalize subro">
+<meta property="og:updated_time" content="2016-08-26T09:27:42.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python协程与异步编程">
+<meta name="twitter:description" content="背景知识在现在流行的编程语言中，异步、协程、事件循环越来越受关注，本文试图探讨一下Python中协程原理，以及在python3.5中实现了IO多路复用、原生协程(coroutine)、与事件循环(event loop)的标准库asyncio
+协程是什么？根据维基百科：
+
+Coroutines are computer program components that generalize subro">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> Python协程与异步编程 | 梵高先生 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">梵高先生</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Python协程与异步编程
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-26T09:41:47+08:00" content="2016-08-26">
+              2016-08-26
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h2><p>在现在流行的编程语言中，异步、协程、事件循环越来越受关注，本文试图探讨一下Python中协程原理，以及在python3.5中实现了IO多路复用、原生协程(coroutine)、与事件循环(event loop)的标准库asyncio</p>
+<h3 id="协程是什么？"><a href="#协程是什么？" class="headerlink" title="协程是什么？"></a>协程是什么？</h3><p>根据维基百科：</p>
+<blockquote>
+<p>Coroutines are computer program components that generalize subroutines for nonpreemptive multitasking, by allowing multiple entry points for suspending and resuming execution at certain locations.  </p>
+</blockquote>
+<p>协程是一种可以为非抢占式多任务生成子程序的计算机组件，它允许多个入口对程序进行挂起、继续执行等操作。与多线程和多进程相比，协程可以只利用一个线程就能更加轻便地实现多任务，将任务切换的开销降到最低,避免了无意义的调度。同时协程维护了正常的代码流程，在保证可读性的同时最大化地利用阻塞IO的空闲时间，成功避免了回调的难题。这里有个例子<a href="http://blog.oneapm.com/apm-tech/113.html" target="_blank" rel="external">异步等待的 Python 协程</a>很形象地解释了协程原理</p>
+<h3 id="yield与协程的关系"><a href="#yield与协程的关系" class="headerlink" title="yield与协程的关系"></a>yield与协程的关系</h3><p>yield最初的引入是在Python2.2<a href="https://www.python.org/dev/peps/pep-0255/" target="_blank" rel="external">PEP 255</a>,为了产生可迭代的序列来生成数据，并保持对生成器调用状态的跟踪。因此，我们利用yield关键字返回的同时，保存函数返回前的运行上下文以及下一条指令，需要的时候可以重新加载上下文从上次离开的下一条命令开始继续执行，我们成为这种return方式叫做yielding。试想如果两个函数f1()和f2()各自包含yield，主线程先启动f1(),当f1()执行到yield时，暂时返回主线程，主线程可以将执行权交给f2()，执行到f2()的yield后，可以再将执行权交给f1(),从而实现了在同一个线程中交错执行f1和f2，换言之，f1和f2是协同执行的程序，故名“协程”。  </p>
+<p>借助yield的“暂停”功能，在Python2.5<a href="https://www.python.org/dev/peps/pep-0342/" target="_blank" rel="external">PEP342</a>中给生成器增加了新的方法，比如send()、throw()和close()，通过send()将协程从上次结束的地方继续执行，使得我们不仅可以暂停生成器，而且能够传递值到生成器暂停的地方，这与next()或for-in都能达到让生成器继续执行的效果。当然，next()也可以启动一个协程<br>下面我们通过一个简单的Producer－Consumer模型来解释yield创建协程：</p>
+<pre><code>def consume():
+    while True:
+        data = yield
+        print(&apos;Consumed: {} &apos;.format(str(data)))
+
+def produce(consumer):
+    import random
+    while True:
+        data = random.randint(0,10)
+        print(&apos;Produced: {} &apos;.format(str(data)))
+        consumer.send(data)
+        yield
+
+consumer = consume()
+next(consumer)
+producer = produce(consumer)
+
+for _ in range(10):
+    next(producer)   
+</code></pre><p>从输出结果可以看出，任何时刻，只有一个协程在运行。</p>
+<p>随着yield的进一步发展到Python3.3,在<a href="https://www.python.org/dev/peps/pep-0380/" target="_blank" rel="external">PEP 380</a>中进一步增强了生成器，它通过yield from表达式，允许生成器将部分功能授予另一个生成器(即子生成器)。因此我们可以让生成器串联起来，使得返回值可以在调用栈中上下浮动，而不用对编码进行过多改动。</p>
+<pre><code>def bottom():
+    return (yield 42)
+
+def middle():
+    return (yield from bottom())
+
+def top():
+    return (yield from middle())
+
+gen = top()
+vaule = next(gen)
+print(value)   # 42
+try:
+    value = gen.send(vaule * 2)
+except StopIteration as exc:
+    value = exc.value
+print(value)   # 84
+</code></pre><p>总结： Python2.2中生成器可以让代码执行过程暂停，Python2.5可以传值给生成器暂停的地方，这使Python协程成为了可能。再加上Python3.3中的yield from，使串联生成器变得十分简单。</p>
+<h2 id="asyncio"><a href="#asyncio" class="headerlink" title="asyncio"></a>asyncio</h2><h3 id="事件循环"><a href="#事件循环" class="headerlink" title="事件循环"></a>事件循环</h3><p>根据维基百科，事件循环是一种等待程序分配事件或消息的编程架构。比如每个浏览器都存在JavaScript事件循环，当你点击某个按钮，这一动作将会发送给JavaScript事件循环，并检查是否注册过onclick回调来处理这一次点击。只要有注册过的回调函数就会伴随点击动作被执行。事件循环之所以是一种循环是因为它不停地收集事件并通过循环来应对这些事件。可以简单理解为“当A发生时，执行B”  </p>
+<h3 id="asyncio-1"><a href="#asyncio-1" class="headerlink" title="asyncio"></a>asyncio</h3><p>在Python中，我们可以通过asyncio来提供事件循环。asyncio重点解决网络服务中的问题。事件循环在这里将“来自套接字的I/O已经准备好读或写”当作“当A发生时”，事件循环对于释放Python GIL极为帮助。<br>asyncio要求所有用作协程的生成器必须由asyncio.coroutine装饰，并且可以对任何asyncio.Future对象使用yield from, 从而将其传递给事件循环，暂停当前协程的执行来等待某些事情的发生，future对象是asyncio的实现细节。一旦future对象获取了事件循环，它会一直在那里监听，直到完成它需要做的一切。当future完成自己的任务后，事件循环就会察觉到，暂停并等待在那里的协程会通过send()方法获取future对象的返回值并开始继续执行。  </p>
+<pre><code>import asyncio
+
+@asyncio.coroutine
+def countdown(number, n):
+    while n &gt; 0:
+        print(&apos;T-times {} {}&apos;.format(n, number))
+        yield from asyncio.sleep(1)
+        n -= 1
+
+loop = asyncio.get_event_loop()
+tasks = [
+    asyncio.ensure_future(countdown(&quot;A&quot;,2)),
+    asyncio.ensure_future(countdown(&quot;B&quot;,3))
+]
+
+loop.run_until_complete(asyncio.wait(tasks))
+loop.close()
+</code></pre><p>以上面代码为例。事件循环启动每一个countdown()协程，一直执行到每一个协程的yield from 和 acyncio.sleep()。这会返回一个asyncio.Future对象并将其传递给事件循环，并暂停当前协程的执行，事件循环会监控这一future对象，倒计时1秒后(同时也会检查其它正在监控的对象，比如其它协程)。1秒时间一到，事件循环将future对象的结果返回给协程，然后协程才能继续执行。直到事件循环被清空，所有协程执行完毕。</p>
+<h3 id="async-await"><a href="#async-await" class="headerlink" title="async/await"></a>async/await</h3><p>随着python3.5的出现，在<a href="https://www.python.org/dev/peps/pep-0492/" target="_blank" rel="external">PEP492</a>中定义了async／await关键字来使用协程:</p>
+<pre><code>import asyncio
+
+async def compute(x, y):
+    print(&quot;Compute {} + {}&quot;.format(x, y))
+    await asyncio.sleep(1)
+    return x+y
+
+async def print_sum(x, y):
+    result = await compute(x, y)
+    print(&quot;{} + {} = {}&quot;.format(x, y, result))
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(print_sum(1, 2))
+loop.close()
+</code></pre><p>需要注意的是，在async def定义的协程中，不能含有yield或yield from表达式，否则会报SyntaxError异常。我们可以将async/await看成python中异步编程的API，不等同于asyncio，它足够灵活可以并不依赖asyncio</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://python.jobbole.com/85117/" target="_blank" rel="external">Python “黑魔法” 之 Generator Coroutines</a></li>
+<li><a href="https://github.com/stanzgy/wiki/blob/master/programming/python_3_coroutines.md" target="_blank" rel="external">小议Python3原生协程机制</a></li>
+<li><a href="http://gold.xitu.io/entry/56ea295ed342d300546e1e22" target="_blank" rel="external">Python3.5协程原理</a></li>
+<li><a href="http://xidui.github.io/2015/10/29/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3python3-4-Asyncio%E5%BA%93%E4%B8%8ENode-js%E7%9A%84%E5%BC%82%E6%AD%A5IO%E6%9C%BA%E5%88%B6/" target="_blank" rel="external">【译】深入理解python3.4中Asyncio库与Node.js的异步IO机制</a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag">#Python</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/24/Pythond多线程/" rel="next" title="Python多线程">
+                <i class="fa fa-chevron-left"></i> Python多线程
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="Zhiyuan Liang" />
+          <p class="site-author-name" itemprop="name">Zhiyuan Liang</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">11</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景知识"><span class="nav-number">1.</span> <span class="nav-text">背景知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#协程是什么？"><span class="nav-number">1.1.</span> <span class="nav-text">协程是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#yield与协程的关系"><span class="nav-number">1.2.</span> <span class="nav-text">yield与协程的关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#asyncio"><span class="nav-number">2.</span> <span class="nav-text">asyncio</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#事件循环"><span class="nav-number">2.1.</span> <span class="nav-text">事件循环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#asyncio-1"><span class="nav-number">2.2.</span> <span class="nav-text">asyncio</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#async-await"><span class="nav-number">2.3.</span> <span class="nav-text">async/await</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhiyuan Liang</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
